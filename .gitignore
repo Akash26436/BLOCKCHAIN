@@ -1,0 +1,57 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Testing
+coverage
+/test/
+
+# Next.js
+.next/
+out/
+
+# Production
+build/
+dist/
+
+# Hardhat
+artifacts/
+cache/
+typechain/
+typechain-types/
+
+# Misc
+.DS_Store
+*.pem
+
+# Debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Local Env Files
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Vercel
+.vercel
+
+# Project-specific logs
+*_error.txt
+*_result.txt
+*_log.txt
+node_output.txt
+deploy_output.txt
+compile_log.txt
+compile_error.txt
+compile_error_peer.txt
+compile_error_verbose.txt
+deploy_result.txt
+deploy_verbose.txt
+direct_deploy_result.txt
+final_deploy_result.txt
+ganache_db/

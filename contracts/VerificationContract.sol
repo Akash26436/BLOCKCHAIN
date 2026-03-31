@@ -33,4 +33,17 @@ contract VerificationContract {
 
         return isAuthentic;
     }
+
+    function verifyByPHash(string memory _pHash) external returns (bool) {
+        string memory contentHash = contentRegistry.pHashToContentHash(_pHash);
+        
+        bool isAuthentic = (bytes(contentHash).length > 0);
+
+        // Log using the pHash since that was the search query
+        auditLog.logVerification(msg.sender, _pHash, isAuthentic);
+
+        emit VerificationResult(msg.sender, _pHash, isAuthentic, block.timestamp);
+
+        return isAuthentic;
+    }
 }

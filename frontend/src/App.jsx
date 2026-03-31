@@ -10,6 +10,8 @@ function App() {
   const [ipfsCID, setIpfsCID] = useState('')
   const [verifyHash, setVerifyHash] = useState('')
   const [verificationResult, setVerificationResult] = useState(null)
+  const [verifyPHash, setVerifyPHash] = useState('')
+  const [pHashResult, setPHashResult] = useState(null)
   const [logs, setLogs] = useState([])
 
   const connectWallet = async () => {
@@ -49,6 +51,20 @@ function App() {
       setVerificationResult(result)
     } catch (err) {
       alert('Verification failed: ' + err.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const verifyByPHash = async (e) => {
+    e.preventDefault()
+    if (!account) return alert('Connect wallet first!')
+    try {
+      setLoading(true)
+      const result = await blockchainService.verifyByPHash(verifyPHash)
+      setPHashResult(result)
+    } catch (err) {
+      alert('pHash Verification failed: ' + err.message)
     } finally {
       setLoading(false)
     }
@@ -118,7 +134,7 @@ function App() {
               required
             />
             <button type="submit" disabled={loading}>
-              Verifying...
+              {loading ? 'Verifying...' : 'Verify Hash'}
             </button>
           </form>
 
@@ -127,6 +143,26 @@ function App() {
               {verificationResult ? '✅ Content is AUTHENTIC!' : '❌ Content is FAKE or UNAUTHORIZED!'}
             </div>
           )}
+
+          <div style={{ marginTop: '2rem', paddingTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+            <h3 style={{ fontSize: '1.2rem', marginBottom: '1rem' }}>Verify by Perceptual Hash</h3>
+            <form onSubmit={verifyByPHash}>
+              <input 
+                placeholder="Enter pHash to Verify" 
+                value={verifyPHash}
+                onChange={(e) => setVerifyPHash(e.target.value)}
+                required
+              />
+              <button type="submit" disabled={loading}>
+                {loading ? 'Verifying...' : 'Verify pHash'}
+              </button>
+            </form>
+            {pHashResult !== null && (
+              <div className={`result-area ${pHashResult ? 'result-authentic' : 'result-fake'}`}>
+                {pHashResult ? '✅ pHash Matches Origin!' : '❌ pHash Not Found!'}
+              </div>
+            )}
+          </div>
         </section>
 
         <section className="section glass-card" style={{ gridColumn: '1 / -1' }}>

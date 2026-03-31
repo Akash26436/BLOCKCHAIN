@@ -14,6 +14,8 @@ contract ContentRegistry {
     mapping(string => Content) public contents;
     // Mapping to check if perceptual hash exists (optional check for similarity)
     mapping(string => bool) public perceptualHashExists;
+    // Mapping from perceptualHash -> contentHash
+    mapping(string => string) public pHashToContentHash;
 
     event ContentRegistered(
         string indexed contentHash,
@@ -43,6 +45,7 @@ contract ContentRegistry {
         });
 
         perceptualHashExists[_perceptualHash] = true;
+        pHashToContentHash[_perceptualHash] = _contentHash;
 
         emit ContentRegistered(
             _contentHash,

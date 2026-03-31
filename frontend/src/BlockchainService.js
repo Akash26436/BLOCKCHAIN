@@ -60,6 +60,21 @@ class BlockchainService {
                     return null;
                 }
             })
+            return event ? event.args.isAuthentic : false;
+    }
+
+    async verifyByPHash(pHash) {
+        const tx = await this.contracts.VerificationContract.verifyByPHash(pHash);
+        const receipt = await tx.wait();
+        
+        const event = receipt.logs
+            .map(log => {
+                try {
+                    return this.contracts.VerificationContract.interface.parseLog(log);
+                } catch (e) {
+                    return null;
+                }
+            })
             .find(e => e?.name === "VerificationResult");
 
         return event ? event.args.isAuthentic : false;

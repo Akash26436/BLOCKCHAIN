@@ -279,6 +279,25 @@ export const ABIs = {
           "type": "string"
         }
       ],
+      "name": "pHashToContentHash",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
       "name": "perceptualHashExists",
       "outputs": [
         {
@@ -386,6 +405,25 @@ export const ABIs = {
         }
       ],
       "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "string",
+          "name": "_pHash",
+          "type": "string"
+        }
+      ],
+      "name": "verifyByPHash",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "nonpayable",
       "type": "function"
     },
     {

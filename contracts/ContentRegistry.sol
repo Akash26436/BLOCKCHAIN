@@ -26,6 +26,7 @@ contract ContentRegistry {
     );
 
     error ContentAlreadyExists(string contentHash);
+    error SimilarContentExists(string perceptualHash);
 
     function registerContent(
         string memory _contentHash,
@@ -34,6 +35,10 @@ contract ContentRegistry {
     ) external {
         if (contents[_contentHash].timestamp != 0) {
             revert ContentAlreadyExists(_contentHash);
+        }
+        
+        if (perceptualHashExists[_perceptualHash]) {
+            revert SimilarContentExists(_perceptualHash);
         }
 
         contents[_contentHash] = Content({

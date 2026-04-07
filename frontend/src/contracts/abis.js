@@ -150,6 +150,17 @@ export const ABIs = {
       "type": "error"
     },
     {
+      "inputs": [
+        {
+          "internalType": "string",
+          "name": "perceptualHash",
+          "type": "string"
+        }
+      ],
+      "name": "SimilarContentExists",
+      "type": "error"
+    },
+    {
       "anonymous": false,
       "inputs": [
         {

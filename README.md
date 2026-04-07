@@ -40,5 +40,24 @@ The system follows a hybrid architecture where the blockchain acts as the trust 
 - **Storage**: IPFS (off-chain)
 - **Local Network**: Ganache / Hardhat Node
 
-## 8 Security Analysis
-Ensures data integrity through cryptographic hashing, non-repudiation through immutable records, and auditability through on-chain logs.
+## 9 Realistic Demo Setup Guide
+For the best project demonstration, follow these steps to simulate a production environment:
+
+### 9.1 Local Node (Ganache)
+1. Run `npx hardhat node` to start your local blockchain.
+2. In the frontend dashboard, click **Connect Wallet** and select a private key from the Ganache output.
+
+### 9.2 Off-Chain Storage (IPFS)
+1. Upload a file in the **Register Original Content** section.
+2. The system will automatically compute the **SHA-256** and **Perceptual Hash** locally.
+3. It will then simulate an upload to **IPFS** and return a valid **CIDv1**.
+4. Click **Establish Provenance** to store only the hashes and CID on the blockchain.
+
+### 9.4 Gasless Demo Mode (Zero-Fee Experience)
+For a frictionless demonstration without MetaMask popups:
+1. Toggle the **DEMO MODE** switch in the top header.
+2. The indicator will turn blue and show **Relayer Active**.
+3. All transactions (Register/Verify) will now be signed instantly by a local relayer account.
+4. This creates a "gasless" feel where the user never sees a transaction fee prompt.
+
+✅ **Setup complete. The system is ready for a professional, zero-friction provenance demonstration.**

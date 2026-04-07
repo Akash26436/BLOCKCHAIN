@@ -4,7 +4,7 @@ const fs = require("fs");
 const path = require("path");
 
 const RPC_URL = "http://127.0.0.1:7545";
-const PRIVATE_KEY = "0x5a48e2c864cec505b24290eb4ca0c0ebce4dfd439d70fe14c69ccb8f8bc01c08";
+const PRIVATE_KEY = "0x58bf836090f4045feed4a25bdbb00341f70c51f95f95e37861e107fdd4586b4a";
 
 async function main() {
     console.log("🚀 Starting Robust Sequential Deployment & ABI Synchronization...");

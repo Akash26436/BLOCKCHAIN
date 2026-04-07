@@ -1,68 +1,74 @@
-import { ethers } from "ethers";
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const { ethers } = require("ethers");
+const fs = require("fs");
+const path = require("path");
 
 async function main() {
-    // Connect to the local Hardhat node
-    const provider = new ethers.JsonRpcProvider("http://127.0.0.1:8545");
-    const signer = await provider.getSigner(0); // Use the first account
+    // Connect directly to the user's running Ganache instance on port 7545
+    const provider = new ethers.JsonRpcProvider("http://127.0.0.1:7545");
+    
+    // Standard Ganache / Hardhat default account #0
+    const privateKey = "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
+    const wallet = new ethers.Wallet(privateKey, provider);
 
-    console.log("Deploying contracts with the account:", await signer.getAddress());
+    console.log("Deploying contracts with the account:", await wallet.getAddress());
 
-    // Function to deploy a contract given its name
+    // Function to deploy a contract given its artifact
     async function deployContract(name, ...args) {
         const artifactPath = path.join(__dirname, `../artifacts/contracts/${name}.sol/${name}.json`);
-        const artifact = JSON.parse(fs.readFileSync(artifactPath, "utf8"));
         
-        const factory = new ethers.ContractFactory(artifact.abi, artifact.bytecode, signer);
-        const contract = await factory.deploy(...args, { gasLimit: 3000000, gasPrice: 20000000000 });
+        if (!fs.existsSync(artifactPath)) {
+            throw new Error(`Artifact for ${name} not found! Please ensure contracts are compiled.`);
+        }
+        
+        const artifact = JSON.parse(fs.readFileSync(artifactPath, "utf8"));
+        const factory = new ethers.ContractFactory(artifact.abi, artifact.bytecode, wallet);
+        
+        console.log(`Deploying ${name}...`);
+        const contract = await factory.deploy(...args);
         await contract.waitForDeployment();
         
-        console.log(`${name} deployed to:`, await contract.getAddress());
-        return contract;
+        const address = await contract.getAddress();
+        console.log(`${name} deployed to:`, address);
+        return address;
     }
 
-    // Deploy AuditLog
-    const auditLog = await deployContract("AuditLog");
+    try {
+        // Deploy AuditLog
+        const auditLogAddress = await deployContract("AuditLog");
 
-    // Deploy ContentRegistry
-    const contentRegistry = await deployContract("ContentRegistry");
+        // Deploy ContentRegistry
+        const contentRegistryAddress = await deployContract("ContentRegistry");
 
-    // Deploy VerificationContract
-    const verificationContract = await deployContract("VerificationContract", 
-        await contentRegistry.getAddress(), 
-        await auditLog.getAddress()
-    );
+        // Deploy VerificationContract (requires addresses of the other two)
+        const verificationContractAddress = await deployContract("VerificationContract", 
+            contentRegistryAddress, 
+            auditLogAddress
+        );
 
-    // Save the addresses to a file for the frontend to use
-    const contractsDir = path.join(__dirname, "../frontend/src/contracts");
+        // Save the addresses to the frontend
+        const contractsDir = path.join(__dirname, "../frontend/src/contracts");
+        if (!fs.existsSync(contractsDir)) {
+            fs.mkdirSync(contractsDir, { recursive: true });
+        }
 
-    if (!fs.existsSync(contractsDir)) {
-        fs.mkdirSync(contractsDir, { recursive: true });
+        const addresses = {
+            AuditLog: auditLogAddress,
+            ContentRegistry: contentRegistryAddress,
+            VerificationContract: verificationContractAddress,
+        };
+
+        fs.writeFileSync(
+            path.join(contractsDir, "contract-address.json"),
+            JSON.stringify(addresses, undefined, 2)
+        );
+
+        console.log("\n✅ All contracts deployed successfully to Ganache!");
+        console.log("📄 Addresses saved to: frontend/src/contracts/contract-address.json");
+
+    } catch (error) {
+        console.error("Deployment failed:", error.message);
+        process.exit(1);
     }
-
-    const addresses = {
-        AuditLog: await auditLog.getAddress(),
-        ContentRegistry: await contentRegistry.getAddress(),
-        VerificationContract: await verificationContract.getAddress(),
-    };
-
-    fs.writeFileSync(
-        path.join(contractsDir, "contract-address.json"),
-        JSON.stringify(addresses, undefined, 2)
-    );
-
-    console.log("\n✅ All contracts deployed successfully!");
-    console.log("📄 Contract addresses saved to frontend/src/contracts/contract-address.json");
 }
 
-main()
-    .then(() => process.exit(0))
-    .catch((error) => {
-        console.error("Deployment failed:", error);
-        process.exit(1);
-    });
+main().catch(console.error);

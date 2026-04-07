@@ -247,6 +247,21 @@ function App() {
     }
   }
 
+  const handleReportForgery = async () => {
+    if (!scannedHashes) return
+    if (!account) return alert('Connect wallet/relayer first!')
+    try {
+      setLoading(true)
+      await blockchainService.reportForgery(scannedHashes.sha256, "Reported Manipulation detected via scan")
+      alert('🚩 FORGERY REPORTED: This hash has been flagged on the blockchain ledger.')
+      fetchLogs()
+    } catch (err) {
+      alert('Reporting failed: ' + err.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
     <div className="container">
       <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -526,7 +541,14 @@ function App() {
                     <span className="verdict-info-val" title={scanContentInfo.contentHash}>{scanContentInfo.contentHash.slice(0, 36)}…</span>
                   </div>
                   <hr className="verdict-divider" />
-                  <div style={{ fontSize: '0.78rem', color: '#f87171' }}>⚠️ The perceptual fingerprint matches an existing record, but the exact hash differs — this suggests the content was cropped, re-encoded, watermarked, or AI-modified.</div>
+                  <div style={{ fontSize: '0.78rem', color: '#f87171', marginBottom: '1rem' }}>⚠️ The perceptual fingerprint matches an existing record, but the exact hash differs — this suggests the content was cropped, re-encoded, watermarked, or AI-modified.</div>
+                  <button 
+                    className="btn-report-forgery"
+                    onClick={handleReportForgery}
+                    disabled={loading}
+                  >
+                    {loading ? 'Flagging...' : '🚩 Flag as Forgery on Blockchain'}
+                  </button>
                 </>
               )}
             </div>
@@ -560,15 +582,17 @@ function App() {
           </div>
           <div className="logs-list">
             {logs.length > 0 ? logs.map((log, i) => (
-              <div key={i} className="log-item">
+              <div key={i} className={`log-item ${log.type === 'report' ? 'log-flagged' : ''}`}>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <code style={{ color: '#4facfe' }}>{log.contentHash.slice(0, 32)}...</code>
-                  <span className={log.result ? 'result-authentic' : 'result-fake'}>
-                    {log.result ? 'VERIFIED' : 'FAILED'}
+                  <code style={{ color: log.type === 'report' ? '#f87171' : '#4facfe' }}>
+                    {log.type === 'report' ? '🚩 ' : ''}{log.contentHash.slice(0, 32)}...
+                  </code>
+                  <span className={log.type === 'report' ? 'result-flagged' : (log.result ? 'result-authentic' : 'result-fake')}>
+                    {log.type === 'report' ? 'FLAGGED' : (log.result ? 'VERIFIED' : 'FAILED')}
                   </span>
                 </div>
                 <div style={{ fontSize: '0.8rem', opacity: 0.6, marginTop: '0.5rem' }}>
-                  Auditor: {log.verifier} | {new Date(Number(log.timestamp) * 1000).toLocaleString()}
+                  {log.type === 'report' ? 'Reporter' : 'Auditor'}: {log.verifier} | {new Date(Number(log.timestamp) * 1000).toLocaleString()}
                 </div>
               </div>
             )) : (

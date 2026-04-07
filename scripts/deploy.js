@@ -6,8 +6,8 @@ async function main() {
     // Connect directly to the user's running Ganache instance on port 7545
     const provider = new ethers.JsonRpcProvider("http://127.0.0.1:7545");
     
-    // Standard Ganache / Hardhat default account #0
-    const privateKey = "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
+    // Use the relayer private key from GaslessService.js to ensure sufficient funds
+    const privateKey = "0x58bf836090f4045feed4a25bdbb00341f70c51f95f95e37861e107fdd4586b4a";
     const wallet = new ethers.Wallet(privateKey, provider);
 
     console.log("Deploying contracts with the account:", await wallet.getAddress());
@@ -29,6 +29,9 @@ async function main() {
         
         const address = await contract.getAddress();
         console.log(`${name} deployed to:`, address);
+        
+        // Wait a bit for Ganache to breath
+        await new Promise(r => setTimeout(r, 2000));
         return address;
     }
 
@@ -39,7 +42,7 @@ async function main() {
         // Deploy ContentRegistry
         const contentRegistryAddress = await deployContract("ContentRegistry");
 
-        // Deploy VerificationContract (requires addresses of the other two)
+        // Deploy VerificationContract
         const verificationContractAddress = await deployContract("VerificationContract", 
             contentRegistryAddress, 
             auditLogAddress

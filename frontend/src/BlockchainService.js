@@ -96,7 +96,34 @@ class BlockchainService {
     }
 
     async getLogs() {
-        return await this.contracts.AuditLog.getLogs();
+        const [vLogs, rLogs] = await Promise.all([
+            this.contracts.AuditLog.getLogs(),
+            this.contracts.AuditLog.getAllReports()
+        ]);
+
+        const formattedVLogs = vLogs.map(log => ({
+            type: 'verify',
+            verifier: log.verifier,
+            contentHash: log.contentHash,
+            result: log.result,
+            timestamp: log.timestamp
+        }));
+
+        const formattedRLogs = rLogs.map(log => ({
+            type: 'report',
+            verifier: log.reporter, // in UI we call it reporter
+            contentHash: log.contentHash,
+            reason: log.reason,
+            result: false, // For easier sorting/styling
+            timestamp: log.timestamp
+        }));
+
+        return [...formattedVLogs, ...formattedRLogs].sort((a, b) => Number(a.timestamp) - Number(b.timestamp));
+    }
+
+    async reportForgery(contentHash, reason = "Reported Manipulation") {
+        const tx = await this.contracts.AuditLog.reportForgery(contentHash, reason);
+        return await tx.wait();
     }
 
     async getContent(contentHash) {
